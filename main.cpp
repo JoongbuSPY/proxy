@@ -15,75 +15,74 @@ DWORD WINAPI p_th(void *data)
 	while(check = recv(th_sock,th_buf,65495,0))
 	{
      	if(check == SOCKET_ERROR)
-			break;
+     		break;
 		th_buf[check] = '\0';
-		char *host = strstr(th_buf, "Host: ");  
-		char *domain = strtok(host, "\r\n");
-		char *cut_host = domain + strlen("Host: ");
-		host_addr = gethostbyname(cut_host);
-		IN_ADDR domain_addr;
-  
-		memcpy(&domain_addr, host_addr->h_addr_list[i], host_addr->h_length);
-		printf("도메인 주소: %s\nIP주소: %s\n", cut_host, inet_ntoa(domain_addr));
-		SOCKET proxy_server_sock = socket(AF_INET, SOCK_STREAM, 0);
-		SOCKADDR_IN proxy_addr_in;
-		proxy_addr_in.sin_family = AF_INET;
-		proxy_addr_in.sin_port = htons(80);
-		proxy_addr_in.sin_addr = *(in_addr *)(host_addr->h_addr_list[0]);
+	char *host = strstr(th_buf, "Host: ");  
+	char *domain = strtok(host, "\r\n");
+	char *cut_host = domain + strlen("Host: ");
+	host_addr = gethostbyname(cut_host);
+	IN_ADDR domain_addr;
 
-		if (connect(proxy_server_sock, (SOCKADDR *)&proxy_addr_in, sizeof(proxy_addr_in)) == -1)
-		{
-			MessageBox(NULL, "Connect 실패", "Error!!", MB_OK);
-			return 1;
-		}
+	memcpy(&domain_addr, host_addr->h_addr_list[i], host_addr->h_length);
+	printf("도메인 주소: %s\nIP주소: %s\n", cut_host, inet_ntoa(domain_addr));
+	SOCKET proxy_server_sock = socket(AF_INET, SOCK_STREAM, 0);
+	SOCKADDR_IN proxy_addr_in;
+	proxy_addr_in.sin_family = AF_INET;
+	proxy_addr_in.sin_port = htons(80);
+	proxy_addr_in.sin_addr = *(in_addr *)(host_addr->h_addr_list[0]);
 
-		printf("\nConnected Server!!\n");
-  
-		check2 = send(proxy_server_sock, th_buf, check, 0);
-  
-		if (check2 == SOCKET_ERROR)
-		{
-			printf("어디 1\n");
-			break;
-		} 
-
-		check2 = recv(proxy_server_sock, th_buf, sizeof(th_buf), 0);
-  
-		if (check2 == SOCKET_ERROR)
-		{
-			MessageBox(NULL, "recv 실패", "Error!!", MB_OK);
-			return 1;
-		}
-
-		th_buf[check2] = '\0';
-		printf("\n\n응답내용\n%s", th_buf);
-
-		char *change;
-
-		while (true)
-		{
-			change = strstr(th_buf, "hacking");
-
-			if (change == NULL)
-			{
-				printf("어디 2\n");
-				break;
-			}
-			else
-				strncpy(change, "booming", strlen("booming"));
-		}
-
-		check2=send(th_sock, th_buf, check2, 0);
-  
-		if (check2 == SOCKET_ERROR)
-		{
-			printf("어디 3\n");
-			break;
-		}
-  
-		ZeroMemory(&th_buf,sizeof(th_buf));
+	if (connect(proxy_server_sock, (SOCKADDR *)&proxy_addr_in, sizeof(proxy_addr_in)) == -1)
+	{
+		MessageBox(NULL, "Connect 실패", "Error!!", MB_OK);
+		return 1;
 	}
- 
+
+	printf("\nConnected Server!!\n");
+
+	check2 = send(proxy_server_sock, th_buf, check, 0);
+
+	if (check2 == SOCKET_ERROR)
+	{
+		printf("어디 1\n");
+		break;
+	} 
+
+	check2 = recv(proxy_server_sock, th_buf, sizeof(th_buf), 0);
+
+	if (check2 == SOCKET_ERROR)
+	{
+		MessageBox(NULL, "recv 실패", "Error!!", MB_OK);
+		return 1;
+	}
+
+	th_buf[check2] = '\0';
+	printf("\n\n응답내용\n%s", th_buf);
+
+	char *change;
+
+	while (true)
+	{
+		change = strstr(th_buf, "hacking");
+
+		if (change == NULL)
+		{
+			printf("어디 2\n");
+			break;
+		}
+		else
+			strncpy(change, "booming", strlen("booming"));
+	}
+
+	check2=send(th_sock, th_buf, check2, 0);
+
+	if (check2 == SOCKET_ERROR)
+	{
+		printf("어디 3\n");
+		break;
+	}
+
+	ZeroMemory(&th_buf,sizeof(th_buf));
+	}
 	printf("쓰레드안\n\n\n");
 
 	closesocket(th_sock); 
@@ -106,7 +105,6 @@ int main(int argc, char *argv[])
 		MessageBox(NULL, "윈속 초기화 실패", "Error!!", MB_OK);
 		return 1;
 	}
-
 
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
 	//1.소켓생성.
@@ -151,11 +149,10 @@ int main(int argc, char *argv[])
 		}
 		th = CreateThread(NULL,0,p_th,(void *)client_sock,0,NULL);
 	}
+	
+printf("쓰레드밖\n\n\n");
+closesocket(sock);
+WSACleanup();
 
- 
-	printf("쓰레드밖\n\n\n");
-	closesocket(sock);
-	WSACleanup();
-
-	return 0;
+return 0;
 }
